@@ -3,3 +3,4 @@ ChromeDrivers/*
 __pycache__/*
 user.txt
 main.py
+debug.log
