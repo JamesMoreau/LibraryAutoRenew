@@ -1,0 +1,5 @@
+ChromeDrivers/*
+.vscode/*
+__pycache__/*
+user.txt
+main.py
