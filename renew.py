@@ -1,48 +1,47 @@
 import webbrowser
+import os
+
 import wget
 import zipfile
 import urllib.request
-import os
-from bs4 import BeautifulSoup
+
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.expected_conditions import presence_of_element_located
+from bs4 import BeautifulSoup
 from win32com.client import Dispatch
 from inscriptis import get_text
-
-def update_chrome_driver(chrome_version):
-    print("UPDATING CHROME DRIVER.")
-    x = chrome_version.split(".")
-    del x[-1]
-    y = '.'.join(x)
-
-    url = 'https://chromedriver.storage.googleapis.com/LATEST_RELEASE_' + y
-
-    html = urllib.request.urlopen(url).read().decode('utf-8')
-    text = get_text(html)
-    driver_version_needed = text.replace('\n', '')
-
-    driver_file_url = 'https://chromedriver.storage.googleapis.com/' + driver_version_needed + '/chromedriver_win32.zip' 
-    filepath = wget.download(driver_file_url, "ChromeDrivers/")
-    with zipfile.ZipFile(filepath, 'r') as zip_ref:
-        zip_ref.extractall("ChromeDrivers")
-
-    os.remove(filepath) # remove zip files 
-
-
-
-
-
-def get_version_via_com(filename):
-    parser = Dispatch("Scripting.FileSystemObject")
-    try:
-        version = parser.GetFileVersion(filename)
-    except Exception:
-        return None
-    return version
+from webdriver_manager.chrome import ChromeDriverManager
 
 if __name__ == "__main__":
-    paths = [r"C:\Program Files\Google\Chrome\Application\chrome.exe",
-             r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"]
-    version = list(filter(None, [get_version_via_com(p) for p in paths]))[0]
-    print(version)
+    print("Auto renew has started")
 
-    update_chrome_driver(version) # this should be used as an exception if the current driver is out of date
+    with open("user.txt") as f:
+        username = f.readline().replace('\n', '')
+        password = f.readline().replace('\n', '')
+
+    driver = webdriver.Chrome(ChromeDriverManager().install())
+    driver.get("https://ocul-gue.primo.exlibrisgroup.com/discovery/login?vid=01OCUL_GUE:GUELPH")
+
+    # login type selection page
+    driver.find_element_by_xpath('//*[@id="tab-content-0"]/div/md-content/md-list/md-list-item[1]/div/button').click()
+
+    # uofg login page
+    username_entry = driver.find_element_by_xpath('//*[@id="inputUsername"]')
+    username_entry.clear()
+    username_entry.send_keys(username)
+
+    password_entry = driver.find_element_by_xpath('//*[@id="inputPassword"]')
+    password_entry.click()
+    password_entry.send_keys(password)
+
+    driver.find_element_by_xpath('//*[@id="main"]/article/form/div[4]/div/button').click()
+
+    #omni main page
+    driver.get('https://ocul-gue.primo.exlibrisgroup.com/discovery/account?vid=01OCUL_GUE:GUELPH&section=overview&lang=en')
+
+    wait1 = WebDriverWait(driver, 10)
+    first_result = wait1.until(presence_of_element_located((By.CSS_SELECTOR, "#tab-content-1 > div > div > div > prm-loans-overview > div > div > div > div > button")))
+    first_result.click()
