@@ -18,7 +18,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 if __name__ == "__main__":
     print("Auto renew has started")
 
-    with open("user.txt") as f:
+    with open("user.txt") as f: #text file containing username and password required.
         username = f.readline().replace('\n', '')
         password = f.readline().replace('\n', '')
 
