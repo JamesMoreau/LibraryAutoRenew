@@ -1,20 +1,9 @@
-import webbrowser
-import os
-
-import wget
-import zipfile
-import urllib.request
 import time
-
+import sys
 from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support.expected_conditions import presence_of_element_located
-from bs4 import BeautifulSoup
-from win32com.client import Dispatch
-from inscriptis import get_text
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver import ActionChains
+from selenium.webdriver.chrome.options import Options
 
 if __name__ == "__main__":
     print("Auto renew has started")
@@ -23,13 +12,21 @@ if __name__ == "__main__":
         username = f.readline().replace('\n', '')
         password = f.readline().replace('\n', '')
 
+    # make headless browser
+    # options = Options()
+    # options.add_argument("--window-size=1920,1080")
+    # options.add_argument("--start-maximized")
+    # options.add_argument("--headless")
     driver = webdriver.Chrome(ChromeDriverManager().install())
+    
     driver.get("https://ocul-gue.primo.exlibrisgroup.com/discovery/login?vid=01OCUL_GUE:GUELPH")
-
+    print("Primo page")
     time.sleep(5)
 
     # login type selection page
-    driver.find_element_by_xpath('//*[@id="tab-content-0"]/div/md-content/md-list/md-list-item[1]/div/button').click()
+    el = driver.find_element_by_xpath('//*[@id="tab-content-0"]/div/md-content/md-list/md-list-item[1]/div/button')
+    actions = ActionChains(driver)
+    actions.move_to_element(el).click().perform()
 
     time.sleep(5)
 
@@ -37,10 +34,10 @@ if __name__ == "__main__":
     username_entry = driver.find_element_by_xpath('//*[@id="inputUsername"]')
     username_entry.clear()
     username_entry.send_keys(username)
-
     password_entry = driver.find_element_by_xpath('//*[@id="inputPassword"]')
     password_entry.click()
     password_entry.send_keys(password)
+    print("logged in to UofG redirect")
 
     time.sleep(5)
 
@@ -50,9 +47,9 @@ if __name__ == "__main__":
 
     #omni main page
     driver.get('https://ocul-gue.primo.exlibrisgroup.com/discovery/account?vid=01OCUL_GUE:GUELPH&section=overview&lang=en')
-
+    print("On omni dashboard")
     time.sleep(5)
-    
-    renew_button = driver.find_element_by_css_selector('#tab-content-0 > div > div > div > prm-loans-overview > div > div > div > div > button').click()
-    #first_result = wait1.until(presence_of_element_located((By.CSS_SELECTOR, "#tab-content-1 > div > div > div > prm-loans-overview > div > div > div > div > button")))
-    #first_result.click()
+    renew_button = driver.find_element_by_xpath('//*[@id="tab-content-4"]/div/div/div/prm-loans-overview/div/div/div/div/button').click()
+    print("Successfully renewed all book loans!")
+
+    driver.close()
